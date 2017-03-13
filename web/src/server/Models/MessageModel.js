@@ -126,15 +126,12 @@ MessageModel.prototype.findAllMessages = function(roomID,lastMessageID,callBack)
             if(callBack)
                 callBack(err,data)
             
-        });                
-            
-    
-    });
-
+        });                 
+    }); 
 }
 
 MessageModel.prototype.findMessages = function(roomID,lastMessageID,limit,callBack){
-            
+     
     if(lastMessageID != 0){
         
         var self = this;
@@ -144,7 +141,7 @@ MessageModel.prototype.findMessages = function(roomID,lastMessageID,limit,callBa
             if (err) return console.error(err);
             
             var lastCreated = message.created;
-            
+            console.log(lastCreated)
             var query = self.model.find({
                 roomID:roomID,
                 created:{$lt:lastCreated}
@@ -156,8 +153,7 @@ MessageModel.prototype.findMessages = function(roomID,lastMessageID,limit,callBa
                     console.error(err);
                 
                 if(callBack)
-                    callBack(err,data)
-                
+                    callBack(err,data) 
             });                
                 
         
@@ -177,8 +173,68 @@ MessageModel.prototype.findMessages = function(roomID,lastMessageID,limit,callBa
         });
     
     
-    }
+    } 
+}
 
+
+MessageModel.prototype.findMessagesByJoinTime = function(roomID,lastJoinTime,limit,callBack){
+     
+    if(lastJoinTime != 0){
+        
+        var self = this;
+        
+        // this.model.findOne({ _id: lastJoinTime },function (err, message) {
+
+        //     if (err) return console.error(err);
+            
+        //     var lastCreated = message.created;
+             
+        //     var query = self.model.find({
+        //         roomID:roomID,
+        //         created:{$lt:lastCreated}
+        //     }).sort({'created': 'desc'}).limit(limit);        
+            
+        //     query.exec(function(err,data){
+                
+        //         if (err)
+        //             console.error(err);
+                
+        //         if(callBack)
+        //             callBack(err,data) 
+        //     });                
+                
+        
+        // });
+        var query = self.model.find({
+                roomID:roomID,
+                created:{$gt:lastJoinTime}
+        }).sort({'created': 'desc'}).limit(limit);        
+            
+        query.exec(function(err,data){
+                
+                if (err)
+                    console.error(err);
+                
+                if(callBack)
+                    callBack(err,data) 
+        });
+        
+        
+    }else{
+        
+        var query = this.model.find({roomID:roomID}).sort({'created': 'desc'}).limit(limit);        
+    
+        query.exec(function(err,data){
+            
+            if (err) return console.error(err);
+            
+            if(callBack)
+                callBack(err,data)
+            
+        });
+    
+    
+    } 
 }
 
 MessageModel.prototype.populateMessages = function(messages,callBack){
@@ -230,13 +286,11 @@ MessageModel.prototype.populateMessages = function(messages,callBack){
                     _.forEach(userResult,function(userElement,userIndex){
                         
                         // replace user to userObj
-                        if(seenByRow.user.toString() == userElement._id.toString()){
-                            
+                        if(seenByRow.user.toString() == userElement._id.toString()){ 
                             seenByAry.push({
                                 user:userElement,
                                 at:seenByRow.at 
-                            });
-                            
+                            }); 
                         }
 
                     });
@@ -245,11 +299,8 @@ MessageModel.prototype.populateMessages = function(messages,callBack){
                 
                 obj.seenBy = seenByAry;
                     
-                resultAry.push(obj);
-                
-            });
-            
-                              
+                resultAry.push(obj); 
+            }); 
             callBack(err,resultAry);
                                    
         });

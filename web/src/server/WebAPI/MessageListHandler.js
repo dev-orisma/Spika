@@ -97,10 +97,14 @@ MessageListHandler.prototype.attach = function(router){
 
     */
     
+
+    // Spika Function
+    /*
     router.get('/:roomID/:lastMessageID',tokenChecker,function(request,response){
                 
         var roomID = request.params.roomID;
         var lastMessageID = request.params.lastMessageID;
+       
         
         if(Utils.isEmpty(roomID)){
             
@@ -113,9 +117,9 @@ MessageListHandler.prototype.attach = function(router){
         async.waterfall([
         
             function (done) {
-
+                // lastMessageID = 0;
                 MessageModel.findMessages(roomID,lastMessageID,Const.pagingLimit,function (err,data) {
-                    
+                   
                     done(err,data);
 
                 });
@@ -124,7 +128,7 @@ MessageListHandler.prototype.attach = function(router){
             function (messages,done) {
 
                 MessageModel.populateMessages(messages,function (err,data) {
-                    
+
                     done(err,data);
 
                 });
@@ -140,6 +144,60 @@ MessageListHandler.prototype.attach = function(router){
                         Const.httpCodeSeverError
                     );
                 
+                }else{
+                    
+                    self.successResponse(response,Const.responsecodeSucceed,{messages:data});
+                    
+                }
+                     
+            }
+            
+        );
+        
+    });
+    */
+
+    // Orisma Function
+    router.get('/:roomID/:lastJoinTime',tokenChecker,function(request,response){
+                
+        var roomID = request.params.roomID;
+        var lastJoinTime = request.params.lastJoinTime;
+
+        if(Utils.isEmpty(roomID)){
+            
+            self.successResponse(response,Const.resCodeMessageListNoRoomID);
+                
+            return;
+            
+        }
+        
+        async.waterfall([
+        
+            function (done) {
+
+                MessageModel.findMessagesByJoinTime(roomID,lastJoinTime,Const.pagingLimit,function (err,data) {
+                   
+                    done(err,data);
+
+                });
+                
+            },
+            function (messages,done) {
+
+                MessageModel.populateMessages(messages,function (err,data) {
+
+                    done(err,data);
+
+                });
+                
+            }
+        ],
+            function (err, data) {
+                if(err){
+                    self.errorResponse(
+                        response,
+                        Const.httpCodeSeverError
+                    );
                 }else{
                     
                     self.successResponse(response,Const.responsecodeSucceed,{messages:data});
